@@ -1,0 +1,33 @@
+{
+    "pursuers": {
+        "num_pursuer_agents": 1,
+        "num_actions": 4,
+        "pursuer_start": [0, 50],
+        "pursuer_speed": 2,
+        "catch_range": 2
+    },
+    "evaders": {
+        "num_evader_agents": 1,
+        "num_actions": 4,
+        "evader_start": [100, 50],
+        "evader_speed": 5
+    },
+    "env": {
+        "grid_dim": [100, 100]
+    },
+    "agent": {
+        "gamma": 0.95,
+        "tau": 0.01,
+        "buffer_size": 10000,
+        "batch_size": 64
+    },
+    "network": {
+        "hidden_dim": 64,
+        "actor_lr": 0.001,
+        "critic_lr": 0.001
+    },
+    "training": {
+        "num_episodes": 1000,
+        "max_episode_len": 1000
+    }
+}

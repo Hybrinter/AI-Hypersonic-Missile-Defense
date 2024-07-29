@@ -1,0 +1,4 @@
+The initial test game should involve a PE in a 2D space with the evader having 2x the speed of the
+pursuer. If the pursuer enters a zone around the evader, the pursuer wins. If the evader reaches the
+pursuer's turf, the evader wins.
+
