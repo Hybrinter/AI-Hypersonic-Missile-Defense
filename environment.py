@@ -1,15 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import math
 
 
 class PursuerEvaderEnv:
     def __init__(self, config):
         self.grid_dim = config['env']['grid_dim']
-        # self.num_pursuers = config['pursuers']['num_pursuers']
-        # self.num_evaders = config['evaders']['num_evaders']
+        self.num_pursuers = config['pursuers']['num_pursuers']
+        self.num_evaders = config['evaders']['num_evaders']
 
-        self.pursuer_start = config['pursuers']['pursuer_start']
-        self.evader_start = config['evaders']['evader_start']
+        self.pursuer_start = np.array(config['pursuers']['pursuer_start'])
+        self.evader_start = np.array(config['evaders']['evader_start'])
         self.catch_range = config['pursuers']['catch_range']
 
         self.pursuer_position = self.pursuer_start
@@ -35,6 +37,8 @@ class PursuerEvaderEnv:
 
     def step(self, pursuer_action, evader_action):
         if not self.done:
+            print(f'Pursuer Position: {self.pursuer_position}')
+            print(f'Evader Position: {self.evader_position}')
             self._move(self.pursuer_position, pursuer_action, True)
             self._move(self.evader_position, evader_action, False)
 
@@ -54,16 +58,17 @@ class PursuerEvaderEnv:
 
     def _move(self, pos, action, is_pursuer):
         speed = self.pursuer_speed if is_pursuer else self.evader_speed
+        direction_norm = 1 / math.sqrt(action[0] ** 2 + action[1] ** 2)
 
         if action[0] < 0:  # left
-            pos[0] = max(pos[0] + action[0] * speed, 0)
+            pos[0] = max(round(pos[0] + action[0] * speed * direction_norm), 0)
         elif action[0] > 0:  # right
-            pos[0] = min(pos[0] + action[0] * speed, self.grid_dim[0] - 1)
+            pos[0] = min(round(pos[0] + action[0] * speed * direction_norm), self.grid_dim[0] - 1)
 
         if action[1] < 0:  # down
-            pos[1] = max(pos[1] + action[1] * speed, 0)
-        elif action[1] > 1:  # up
-            pos[1] = min(pos[1] + action[1] * speed, self.grid_dim[1] - 1)
+            pos[1] = max(round(pos[1] + action[1] * speed * direction_norm), 0)
+        elif action[1] > 0:  # up
+            pos[1] = min(round(pos[1] + action[1] * speed * direction_norm), self.grid_dim[1] - 1)
 
     def _is_caught(self):
         return np.linalg.norm(self.pursuer_position - self.evader_position) <= self.catch_range
@@ -73,9 +78,18 @@ class PursuerEvaderEnv:
 
     def render(self):
         grid = np.zeros((self.grid_dim[0], self.grid_dim[1], 3))
-        grid[self.pursuer_position[1], self.pursuer_position[0]] = [255, 0, 0]  # Red for pursuer
-        grid[self.evader_position[1], self.evader_position[0] - 1] = [0, 0, 255]  # Blue for evader
+        grid[self.grid_dim[1] - self.pursuer_position[1], self.pursuer_position[0]] = [255, 0, 0]  # Red for pursuer
+        grid[self.grid_dim[1] - self.evader_position[1], self.evader_position[0] - 1] = [0, 0, 255]  # Blue for evader
 
-        plt.imshow(grid)
+        fig, ax = plt.subplots()
+        ax.imshow(grid)
+
+        # Draw circle around pursuer
+        circle_pursuer = patches.Circle(
+            (float(self.pursuer_position[0]), float(self.grid_dim[1] - self.pursuer_position[1])),
+            self.catch_range, fill=False, edgecolor='red', linestyle='dashed'
+        )
+        ax.add_patch(circle_pursuer)
+
         plt.axis('off')
         plt.show()

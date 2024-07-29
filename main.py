@@ -1,15 +1,16 @@
 from environment import PursuerEvaderEnv
 from agent import Agent
-from networks import Actor, Critic
+from networks import Actor, CentralizedCritic
 from replay_buffer import ReplayBuffer
 from config_manager import ConfigManager
+import numpy as np
 
 
-def train(env, pursuers, evaders, train_config):
+def train(env, pursuers, evaders, config):
     batch_size = config['agent']['batch_size']
     num_episodes = config['training']['num_episodes']
 
-    for episode in range(train_config['num_episodes']):
+    for episode in range(config['training']['num_episodes']):
         states = env.reset()
         total_reward = 0
 
@@ -43,19 +44,19 @@ if __name__ == "__main__":
     env = PursuerEvaderEnv(config)
 
     pursuers = []
-    for _ in range(config['env']['num_pursuer_agents']):
+    for index in range(config['pursuers']['num_pursuer_agents']):
         actor = Actor(config)
-        critic = Critic(config)
+        critic = CentralizedCritic(config)
         replay_buffer = ReplayBuffer(config)
-        agent = Agent(actor, critic, replay_buffer, config)
+        agent = Agent(actor, critic, index, replay_buffer, config)
         pursuers.append(agent)
 
     evaders = []
-    for _ in range(config['env']['num_evader_agents']):
+    for index in range(config['evaders']['num_evader_agents']):
         actor = Actor(config)
-        critic = Critic(config)
+        critic = CentralizedCritic(config)
         replay_buffer = ReplayBuffer(config)
-        agent = Agent(actor, critic, replay_buffer, config)
+        agent = Agent(actor, critic, index, replay_buffer, config)
         evaders.append(agent)
 
     train(env, pursuers, evaders, config)

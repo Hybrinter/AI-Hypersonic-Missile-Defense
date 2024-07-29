@@ -22,7 +22,7 @@
         "batch_size": 64
     },
     "network": {
-        "hidden_dim": 64,
+        "layer_size": 64,
         "actor_lr": 0.001,
         "critic_lr": 0.001
     },
